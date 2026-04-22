@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sentiment Analyzer</title>
+    <title>Sentiment AI</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: Inter, sans-serif;
         }
 
         body {
@@ -25,22 +25,19 @@
             width: 450px;
             padding: 35px;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255,255,255,0.06);
             backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.1);
             text-align: center;
         }
 
         h1 {
             color: white;
-            font-size: 26px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         p {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
+            color: rgba(255,255,255,0.6);
             margin-bottom: 20px;
         }
 
@@ -50,54 +47,21 @@
             border-radius: 12px;
             border: none;
             outline: none;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.08);
             color: white;
-            font-size: 14px;
-        }
-
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        button {
-            width: 100%;
-            margin-top: 15px;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            transform: scale(1.03);
         }
 
         .result {
             margin-top: 25px;
             font-size: 24px;
             font-weight: 700;
+            color: white;
         }
 
-        .Positive {
-            color: #22c55e;
-        }
-
-        .Negative {
-            color: #ef4444;
-        }
-
-        .Neutral {
-            color: #facc15;
-        }
-
-        .footer {
-            margin-top: 15px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
+        .sub {
+            font-size: 14px;
+            margin-top: 6px;
+            color: #ccc;
         }
     </style>
 </head>
@@ -106,23 +70,43 @@
 
 <div class="container">
     <h1>Sentiment AI</h1>
-    <p>Type text and analyze emotion instantly</p>
+    <p>Live prediction (no refresh)</p>
 
-    <form method="POST">
-        <input name="text" placeholder="Example: I am very happy today" />
-        <button type="submit">Analyze</button>
-    </form>
+    <input id="text" placeholder="Type something..." oninput="predict()" />
 
-    {% if result %}
-        <div class="result {{ result }}">
-            {{ result }}
-        </div>
-    {% endif %}
-
-    <div class="footer">
-        TF-IDF + Logistic Regression • Flask App
-    </div>
+    <div class="result" id="result"></div>
+    <div class="sub" id="confidence"></div>
 </div>
+
+<script>
+async function predict() {
+    const text = document.getElementById("text").value;
+
+    if (!text.trim()) {
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("confidence").innerHTML = "";
+        return;
+    }
+
+    const res = await fetch("/predict", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: text })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("result").innerHTML =
+        data.emoji + " " + data.result;
+
+    if (data.confidence) {
+        document.getElementById("confidence").innerHTML =
+            "Confidence: " + data.confidence + "%";
+    }
+}
+</script>
 
 </body>
 </html>

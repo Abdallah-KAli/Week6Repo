@@ -1,32 +1,63 @@
-from flask import Flask, render_template, request
-from src.predict import predict
+from flask import Flask, render_template, request, jsonify
+import pickle
+import numpy as np
+from src.preprocessing import clean_text
 
 app = Flask(__name__)
 
+with open("models/model.pkl", "rb") as f:
+    model = pickle.load(f)
+
 label_map = {
-    "negative": "Negative",
-    "neutral": "Neutral",
-    "positive": "Positive"
+    0: ("Negative", "😡"),
+    1: ("Neutral", "😐"),
+    2: ("Positive", "😊"),
+    "negative": ("Negative", "😡"),
+    "neutral": ("Neutral", "😐"),
+    "positive": ("Positive", "😊")
 }
 
-@app.route("/", methods=["GET", "POST"])
+def normalize(pred):
+    if isinstance(pred, str):
+        return label_map.get(pred.lower(), ("Unknown", "❓"))
+
+    try:
+        return label_map.get(int(pred), ("Unknown", "❓"))
+    except:
+        return ("Unknown", "❓")
+
+
+def get_confidence(text):
+    if hasattr(model, "predict_proba"):
+        proba = model.predict_proba([text])[0]
+        return round(float(np.max(proba)) * 100, 2)
+    return None
+
+
+@app.route("/")
 def home():
-    result = None
+    return render_template("index.html")
 
-    if request.method == "POST":
-        text = request.form.get("text")
 
-        if text:
-            pred = predict(text)
+@app.route("/predict", methods=["POST"])
+def predict_route():
+    data = request.json
+    text = data.get("text", "")
 
-            print("RAW PRED:", pred)
+    cleaned = clean_text(text)
 
-            if isinstance(pred, str):
-                result = label_map.get(pred.lower(), "Unknown")
-            else:
-                result = "Unknown"
+    pred = model.predict([cleaned])[0]
 
-    return render_template("index.html", result=result)
+    result, emoji = normalize(pred)
+
+    confidence = get_confidence(cleaned)
+
+    return jsonify({
+        "result": result,
+        "emoji": emoji,
+        "confidence": confidence
+    })
+
 
 if __name__ == "__main__":
     app.run(debug=True)
