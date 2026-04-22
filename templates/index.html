@@ -3,55 +3,37 @@
 <head>
     <title>Sentiment Chat AI</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Inter, sans-serif;
-        }
-
         body {
-            height: 100vh;
             background: #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            font-family: Arial;
         }
 
-        .chat-box {
+        .box {
             width: 450px;
             height: 600px;
             background: rgba(255,255,255,0.05);
             border-radius: 20px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .header {
-            padding: 15px;
-            text-align: center;
-            color: white;
-            font-weight: 700;
-            background: rgba(255,255,255,0.05);
         }
 
         .messages {
             flex: 1;
-            padding: 15px;
+            padding: 10px;
             overflow-y: auto;
         }
 
         .msg {
-            padding: 10px 14px;
-            margin: 8px 0;
-            border-radius: 12px;
-            max-width: 80%;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
             color: white;
+            max-width: 80%;
         }
 
         .user {
@@ -61,46 +43,34 @@
 
         .bot {
             background: rgba(255,255,255,0.1);
-            margin-right: auto;
         }
 
-        .input-box {
+        .input {
             display: flex;
             padding: 10px;
-            background: rgba(255,255,255,0.05);
         }
 
         input {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            outline: none;
-            background: rgba(255,255,255,0.08);
-            color: white;
+            padding: 10px;
         }
 
         button {
-            margin-left: 10px;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 10px;
+            padding: 10px;
             background: #8b5cf6;
             color: white;
-            cursor: pointer;
+            border: none;
         }
     </style>
 </head>
 
 <body>
 
-<div class="chat-box">
-
-    <div class="header">Sentiment Chat AI</div>
+<div class="box">
 
     <div class="messages" id="messages"></div>
 
-    <div class="input-box">
+    <div class="input">
         <input id="text" placeholder="Type message..." />
         <button onclick="send()">Send</button>
     </div>
@@ -109,40 +79,37 @@
 
 <script>
 async function send() {
-    const input = document.getElementById("text");
-    const text = input.value;
-
+    let text = document.getElementById("text").value;
     if (!text.trim()) return;
 
-    addMessage(text, "user");
+    add(text, "user");
 
-    input.value = "";
+    document.getElementById("text").value = "";
 
-    const res = await fetch("/predict", {
+    let res = await fetch("/predict", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text: text })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({text})
     });
 
-    const data = await res.json();
+    let data = await res.json();
 
-    addMessage(
-        data.emoji + " " + data.result +
-        (data.confidence ? " (" + data.confidence + "%)" : ""),
-        "bot"
-    );
+    let output = data.emoji + " " + data.result;
+
+    if (data.confidence !== null && data.confidence !== undefined) {
+        output += " (" + data.confidence + "%)";
+    }
+
+    add(output, "bot");
 }
 
-function addMessage(text, type) {
-    const msg = document.createElement("div");
-    msg.classList.add("msg", type);
-    msg.innerText = text;
+function add(text, type) {
+    let div = document.createElement("div");
+    div.classList.add("msg", type);
+    div.innerText = text;
 
-    document.getElementById("messages").appendChild(msg);
-
-    const box = document.getElementById("messages");
+    let box = document.getElementById("messages");
+    box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
 </script>

@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, jsonify
 import pickle
-import numpy as np
 from src.preprocessing import clean_text
 
 app = Flask(__name__)
@@ -8,29 +7,11 @@ app = Flask(__name__)
 with open("models/model.pkl", "rb") as f:
     model = pickle.load(f)
 
-label_map = {
-    0: ("Negative", "😡"),
-    1: ("Neutral", "😐"),
-    2: ("Positive", "😊"),
-    "negative": ("Negative", "😡"),
-    "neutral": ("Neutral", "😐"),
-    "positive": ("Positive", "😊")
+emoji_map = {
+    "positive": "😊",
+    "negative": "😡",
+    "neutral": "😐"
 }
-
-def normalize(pred):
-    if isinstance(pred, str):
-        return label_map.get(pred.lower(), ("Unknown", "❓"))
-    try:
-        return label_map.get(int(pred), ("Unknown", "❓"))
-    except:
-        return ("Unknown", "❓")
-
-def get_confidence(text):
-    if hasattr(model, "predict_proba"):
-        proba = model.predict_proba([text])[0]
-        return round(float(np.max(proba)) * 100, 2)
-    return None
-
 
 @app.route("/")
 def home():
@@ -38,20 +19,24 @@ def home():
 
 
 @app.route("/predict", methods=["POST"])
-def predict_route():
+def predict():
     data = request.json
     text = data.get("text", "")
 
     cleaned = clean_text(text)
 
     pred = model.predict([cleaned])[0]
+    pred_str = str(pred).lower()
 
-    result, emoji = normalize(pred)
+    emoji = emoji_map.get(pred_str, "❓")
 
-    confidence = get_confidence(cleaned)
+    confidence = None
+    if hasattr(model, "predict_proba"):
+        proba = model.predict_proba([cleaned])[0]
+        confidence = round(float(max(proba)) * 100, 2)
 
     return jsonify({
-        "result": result,
+        "result": pred_str,
         "emoji": emoji,
         "confidence": confidence
     })
