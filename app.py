@@ -20,12 +20,10 @@ label_map = {
 def normalize(pred):
     if isinstance(pred, str):
         return label_map.get(pred.lower(), ("Unknown", "❓"))
-
     try:
         return label_map.get(int(pred), ("Unknown", "❓"))
     except:
         return ("Unknown", "❓")
-
 
 def get_confidence(text):
     if hasattr(model, "predict_proba"):

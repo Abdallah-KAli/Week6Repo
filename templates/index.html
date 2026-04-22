@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sentiment AI</title>
+    <title>Sentiment Chat AI</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -15,78 +15,108 @@
 
         body {
             height: 100vh;
+            background: #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle at top, #1e293b, #0f172a);
         }
 
-        .container {
+        .chat-box {
             width: 450px;
-            padding: 35px;
+            height: 600px;
+            background: rgba(255,255,255,0.05);
             border-radius: 20px;
-            background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(14px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header {
+            padding: 15px;
             text-align: center;
-        }
-
-        h1 {
             color: white;
-            margin-bottom: 10px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.05);
         }
 
-        p {
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 20px;
+        .messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .msg {
+            padding: 10px 14px;
+            margin: 8px 0;
+            border-radius: 12px;
+            max-width: 80%;
+            color: white;
+        }
+
+        .user {
+            background: #6366f1;
+            margin-left: auto;
+        }
+
+        .bot {
+            background: rgba(255,255,255,0.1);
+            margin-right: auto;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
         }
 
         input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
+            flex: 1;
+            padding: 12px;
             border: none;
+            border-radius: 10px;
             outline: none;
             background: rgba(255,255,255,0.08);
             color: white;
         }
 
-        .result {
-            margin-top: 25px;
-            font-size: 24px;
-            font-weight: 700;
+        button {
+            margin-left: 10px;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 10px;
+            background: #8b5cf6;
             color: white;
-        }
-
-        .sub {
-            font-size: 14px;
-            margin-top: 6px;
-            color: #ccc;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h1>Sentiment AI</h1>
-    <p>Live prediction (no refresh)</p>
+<div class="chat-box">
 
-    <input id="text" placeholder="Type something..." oninput="predict()" />
+    <div class="header">Sentiment Chat AI</div>
 
-    <div class="result" id="result"></div>
-    <div class="sub" id="confidence"></div>
+    <div class="messages" id="messages"></div>
+
+    <div class="input-box">
+        <input id="text" placeholder="Type message..." />
+        <button onclick="send()">Send</button>
+    </div>
+
 </div>
 
 <script>
-async function predict() {
-    const text = document.getElementById("text").value;
+async function send() {
+    const input = document.getElementById("text");
+    const text = input.value;
 
-    if (!text.trim()) {
-        document.getElementById("result").innerHTML = "";
-        document.getElementById("confidence").innerHTML = "";
-        return;
-    }
+    if (!text.trim()) return;
+
+    addMessage(text, "user");
+
+    input.value = "";
 
     const res = await fetch("/predict", {
         method: "POST",
@@ -98,13 +128,22 @@ async function predict() {
 
     const data = await res.json();
 
-    document.getElementById("result").innerHTML =
-        data.emoji + " " + data.result;
+    addMessage(
+        data.emoji + " " + data.result +
+        (data.confidence ? " (" + data.confidence + "%)" : ""),
+        "bot"
+    );
+}
 
-    if (data.confidence) {
-        document.getElementById("confidence").innerHTML =
-            "Confidence: " + data.confidence + "%";
-    }
+function addMessage(text, type) {
+    const msg = document.createElement("div");
+    msg.classList.add("msg", type);
+    msg.innerText = text;
+
+    document.getElementById("messages").appendChild(msg);
+
+    const box = document.getElementById("messages");
+    box.scrollTop = box.scrollHeight;
 }
 </script>
 
