@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sentiment Chat AI</title>
+    <title>Sentiment AI Model</title>
 
     <style>
         body {
@@ -20,6 +20,13 @@
             border-radius: 20px;
             display: flex;
             flex-direction: column;
+        }
+
+        h2 {
+            color: white;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
         }
 
         .messages {
@@ -53,6 +60,8 @@
         input {
             flex: 1;
             padding: 10px;
+            border: none;
+            outline: none;
         }
 
         button {
@@ -60,6 +69,7 @@
             background: #8b5cf6;
             color: white;
             border: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -67,6 +77,8 @@
 <body>
 
 <div class="box">
+
+    <h2>Sentiment Analysis AI Model</h2>
 
     <div class="messages" id="messages"></div>
 
@@ -80,6 +92,7 @@
 <script>
 async function send() {
     let text = document.getElementById("text").value;
+
     if (!text.trim()) return;
 
     add(text, "user");
