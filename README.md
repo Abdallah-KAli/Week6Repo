@@ -1,31 +1,80 @@
-# Sentiment Analysis Chat AI
+# AI Sentiment Analysis Web App
+
+A web-based sentiment analysis application built using Flask and Machine Learning.
+
+The application allows users to enter text and automatically predicts whether the sentiment is:
+
+* Positive 😊
+* Negative 😡
+* Neutral 😐
+
+The prediction result is displayed with a confidence score and a modern interactive user interface.
 
 ## Features
-- Real-time sentiment prediction
-- Emoji output
-- Confidence score
-- Chat UI
-- Dataset visualization
-- PDF export
 
-## Dataset
-Twitter Airline Sentiment Dataset
+* Real-time sentiment prediction
+* Confidence percentage display
+* Clean text preprocessing
+* Flask web application
+* Modern responsive UI
+* Machine Learning classification model
+* Support for Positive, Negative, and Neutral sentiment classes
 
-## Tech Stack
-- Flask
-- Scikit-learn (TF-IDF + Logistic Regression)
-- HTML/CSS/JS
-- ReportLab
+## Technologies Used
 
-## Run
+  Python
+  Flask
+  Scikit-learn
+  HTML
+  CSS
+  JavaScript
+
+## Project Structure
+
+├── app.py
+├── data/
+├── models/
+│   ├── model.pkl
+│   └── vectorizer.pkl
+├── src/
+│   └── preprocessing.py
+├── templates/
+│   └── index.html
+└── requirements.txt
+
+
+## How to Run
+
+Install dependencies:
+
 pip install -r requirements.txt
-python train.py
+
+
+Run the application:
+
 python app.py
 
-## Routes
-/ → chat UI  
-/dashboard → dataset graph  
-/download-pdf → export chat  
 
-## Author
-Week 6 Project
+Open:
+
+http://127.0.0.1:5000
+
+## Example
+
+Input:
+
+I absolutely love this application. It is easy to use and very useful.
+
+
+Output:
+
+Positive 😊
+Confidence: 92%
+
+
+## License
+
+MIT License
+
+
+Developed as part of the Optimum Partners Practical Training Program.
